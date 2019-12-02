@@ -1,0 +1,7 @@
+*.d
+*.obj
+*.lib
+*.a
+*.exe
+*.xbe
+*.iso
