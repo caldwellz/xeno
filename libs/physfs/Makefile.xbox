@@ -1,0 +1,32 @@
+PHYSFS_DIR = $(LIBS_DIR)/physfs
+PHYSFS_SRCS = $(wildcard $(PHYSFS_DIR)/src/*.c)
+PHYSFS_OBJS = $(addsuffix .obj, $(basename $(PHYSFS_SRCS)))
+PHYSFS_DEPS = $(addsuffix .d, $(PHYSFS_SRCS))
+PHYSFS_LIB = $(LIBS_DIR)/libphysfs$(LIB_EXT)
+
+$(PHYSFS_LIB): $(PHYSFS_OBJS)
+
+$(BINTARGET): $(PHYSFS_LIB)
+
+PHYSFS_FLAGS = -I$(PHYSFS_DIR)/src \
+          -DPHYSFS_SUPPORTS_ZIP=1 \
+          -DPHYSFS_SUPPORTS_7Z=0 \
+          -DPHYSFS_SUPPORTS_GRP=0 \
+          -DPHYSFS_SUPPORTS_WAD=0 \
+          -DPHYSFS_SUPPORTS_HOG=0 \
+          -DPHYSFS_SUPPORTS_MVL=0 \
+          -DPHYSFS_SUPPORTS_QPAK=0 \
+          -DPHYSFS_SUPPORTS_SLB=0 \
+          -DPHYSFS_SUPPORTS_VDF=0 \
+          -DPHYSFS_SUPPORTS_ISO9660=0
+
+CFLAGS   += $(PHYSFS_FLAGS)
+CXXFLAGS += $(PHYSFS_FLAGS)
+
+clean: clean-physfs
+
+.PHONY: clean-physfs
+clean-physfs:
+	$(VE)$(RM) $(PHYSFS_OBJS) \
+             $(PHYSFS_DEPS) \
+	           $(PHYSFS_LIB)

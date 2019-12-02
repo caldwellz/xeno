@@ -1,0 +1,110 @@
+ifeq ($(OUTPUT_DIR),)
+OUTPUT_DIR = bin
+endif
+
+ifeq ($(TOOLCHAIN_DIR),)
+TOOLCHAIN_DIR = /usr/bin
+endif
+
+ifeq ($(TOOLCHAIN_PREFIX),)
+TOOLCHAIN_PREFIX = x86_64-w64-mingw32-
+endif
+
+ifneq ($(NDEBUG),)
+DEBUG_FLAG = -DNDEBUG
+else
+DEBUG_FLAG = -DDEBUG
+endif
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+LD           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)gcc
+AS           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)as
+CC           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)gcc
+CXX          = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)g++
+RM           = rm -f
+AR           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)ar
+endif
+
+BINTARGET   = $(OUTPUT_DIR)/$(APP_TITLE).exe
+# -Wno-deprecated-declarations
+APP_CFLAGS  = -fno-exceptions -Wno-ignored-attributes -Werror=implicit-function-declaration \
+							-DAPP_TITLE='"$(APP_TITLE)"' -I"$(ENGINE_DIR)/include" $(DEBUG_FLAG)
+APP_ASFLAGS = 
+APP_CXXFLAGS = $(APP_CFLAGS) -fno-threadsafe-statics -fno-rtti
+APP_LDFLAGS = -lkernel32
+LIB_EXT = .a
+
+
+ifeq ($(DEBUG),y)
+APP_CFLAGS += -g -gdwarf-4
+APP_CXXFLAGS += -g -gdwarf-4
+APP_LDFLAGS += -debug
+endif
+
+all: $(BINTARGET)
+
+OBJS = $(addsuffix .obj, $(basename $(SRCS)))
+
+ifneq ($(APP_NET),)
+include $(SDK_DIR)/lib/net/Makefile
+endif
+
+ifneq ($(APP_SDL),)
+APP_LDFLAGS += -lSDL2
+endif
+
+V = 0
+VE_0 := @
+VE_1 :=
+VE = $(VE_$(V))
+
+ifeq ($(V),1)
+QUIET=
+else
+QUIET=>/dev/null
+endif
+
+DEPS := $(filter %.c.d, $(SRCS:.c=.c.d))
+DEPS += $(filter %.cpp.d, $(SRCS:.cpp=.cpp.d))
+
+$(OUTPUT_DIR):
+	@mkdir -p $(OUTPUT_DIR);
+
+$(BINTARGET): $(OBJS)
+	@echo "[ LD       ] $@"
+	$(VE) $(LD) -o$@ $^ $(APP_LDFLAGS) $(LDFLAGS)
+
+%$(LIB_EXT):
+	@echo "[ AR       ] $@"
+	$(VE) $(AR) rcs $@ $^
+
+%.obj: %.cpp
+	@echo "[ CXX      ] $@"
+	$(VE) $(CXX) $(APP_CXXFLAGS) $(CXXFLAGS) -MD -MP -MT '$@' -MF '$(patsubst %.cpp,%.cpp.d,$<)' -c -o '$@' '$<'
+
+%.obj: %.c
+	@echo "[ CC       ] $@"
+	$(VE) $(CC) $(APP_CFLAGS) $(CFLAGS) -MD -MP -MT '$@' -MF '$(patsubst %.c,%.c.d,$<)' -c -o '$@' '$<'
+
+%.obj: %.s
+	@echo "[ AS       ] $@"
+	$(VE) $(AS) $(APP_ASFLAGS) $(ASFLAGS) -c -o '$@' '$<'
+
+tools: $(TOOLS)
+.PHONY: tools $(TOOLS)
+
+.PHONY: clean 
+clean: $(CLEANRULES)
+	$(VE)rm -f $(BINTARGET) \
+	           $(OBJS) $(SHADER_OBJS) $(DEPS)
+
+.PHONY: distclean 
+distclean: clean
+	$(VE)rm -rf $(SDK_DIR)/tools/extract-xiso/build
+	$(VE)$(MAKE) -C $(SDK_DIR)/tools/fp20compiler distclean $(QUIET)
+	$(VE)$(MAKE) -C $(SDK_DIR)/tools/vp20compiler distclean $(QUIET)
+	$(VE)$(MAKE) -C $(SDK_DIR)/tools/cxbe clean $(QUIET)
+	$(VE)bash -c "if [ -d $(OUTPUT_DIR) ]; then rmdir $(OUTPUT_DIR); fi"
+
+-include $(DEPS)

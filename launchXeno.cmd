@@ -1,0 +1,1 @@
+..\tools\xqemu\launchISO.cmd %~dp0\xeno.iso

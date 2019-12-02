@@ -1,0 +1,28 @@
+XBE_TITLE = $(APP_TITLE)
+BINTARGET = main.exe
+GEN_XISO = $(XBE_TITLE).iso
+ifeq ($(NXDK_DIR),)
+	NXDK_DIR = $(XENO_DIR)/..
+endif
+NXDK_SDL = $(APP_SDL)
+
+ifneq ($(NDEBUG),)
+DEBUG_FLAG = -DNDEBUG
+else
+DEBUG_FLAG = -DDEBUG
+endif
+
+APP_FLAGS += -DNXDK -DAPP_TITLE='"$(APP_TITLE)"' $(DEBUG_FLAG) \
+						 -ferror-limit=10 -Werror=implicit-function-declaration \
+						 -I$(ENGINE_DIR)/include
+CFLAGS += $(APP_FLAGS)
+CXXFLAGS += $(APP_FLAGS)
+RM = rm -f
+LIB_EXT = .lib
+XENO_OBJS = $(addsuffix .obj, $(basename $(XENO_SRCS)))
+
+include $(NXDK_DIR)/Makefile
+
+project-clean:
+	$(VE)rm -f $(TARGET) \
+	           main.exe main.exe.manifest main.lib $(XENO_OBJS) $(PHYSFS_LIB) $(PHYSFS_OBJS)
