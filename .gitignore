@@ -3,5 +3,7 @@
 *.lib
 *.a
 *.exe
+*.dll
 *.xbe
 *.iso
+assets

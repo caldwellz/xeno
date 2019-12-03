@@ -5,8 +5,13 @@
 #ifndef _XENO_FSUTILS_H_
 #define _XENO_FSUTILS_H_
 
+#include <stdint.h>
+#include <SDL2/SDL_rwops.h>
+
 void XENO_concatBasePath(const char* path, char** target);
-int XENO_readFile(const char* inFilename, char** outData);
+uint32_t XENO_readFile(const char* inFilename, char** outData);
 int XENO_initFilesystem(const char *argv0, const char** readPaths, size_t nReadPaths);
+SDL_RWops* XENO_openSDLBuffer(const char* inFilename);
+void XENO_closeSDLBuffer(SDL_RWops* rw);
 
 #endif //_XENO_FSUTILS_H_

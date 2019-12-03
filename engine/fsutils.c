@@ -5,6 +5,7 @@
 #include <xeno/platform.h>
 #include <xeno/fsutils.h>
 #include <physfs.h>
+#include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -48,7 +49,7 @@ void XENO_concatBasePath(const char* path, char** target) {
 }
 
 
-int XENO_readFile(const char* inFilename, char** outData) {
+uint32_t XENO_readFile(const char* inFilename, char** outData) {
   assert(PHYSFS_isInit());
   if (inFilename && outData) {
     int status = PHYSFS_exists(inFilename);
@@ -56,12 +57,12 @@ int XENO_readFile(const char* inFilename, char** outData) {
     if (status) {
       PHYSFS_File* myfile = PHYSFS_openRead(inFilename);
       assert(myfile != NULL);
-      PHYSFS_sint64 file_size = PHYSFS_fileLength(myfile);
+      uint32_t file_size = PHYSFS_fileLength(myfile);
 
       char* buffer;
       buffer = malloc(file_size + 1);
       if (buffer) {
-        PHYSFS_sint64 length_read = PHYSFS_read(myfile, buffer, 1, file_size);
+        uint32_t length_read = PHYSFS_read(myfile, buffer, 1, file_size);
         PHYSFS_close(myfile);
 
         if (length_read == file_size) {
@@ -131,4 +132,33 @@ int XENO_initFilesystem(const char *argv0, const char** readPaths, size_t nReadP
   }
 
   return rv;
+}
+
+
+SDL_RWops* XENO_openSDLBuffer(const char* inFilename) {
+  char* buffer = NULL;
+  uint32_t size = XENO_readFile(inFilename, &buffer);
+
+  if (buffer) {
+    if (size) {
+      SDL_RWops* rw = SDL_RWFromMem((void*) buffer, size);
+      return rw;
+    }
+    else {
+      free(buffer);
+      return NULL;
+    }
+  }
+  else
+    return NULL;
+}
+
+
+void XENO_closeSDLBuffer(SDL_RWops* rw) {
+  if (rw) {
+    void* buf = rw->hidden.mem.base;
+    SDL_RWclose(rw);
+    if (buf)
+      free(buf);
+  }
 }
