@@ -7,6 +7,13 @@
 
 #include <SDL2/SDL_render.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SDL_Texture * XENO_LoadBMPTexture(SDL_Renderer *renderer, const char *filename);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //_XENO_IMAGEUTILS_H_

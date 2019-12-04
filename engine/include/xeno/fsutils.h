@@ -8,10 +8,17 @@
 #include <stdint.h>
 #include <SDL2/SDL_rwops.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void XENO_concatBasePath(const char* path, char** target);
 uint32_t XENO_readFile(const char* inFilename, char** outData);
 int XENO_initFilesystem(const char *argv0, const char** readPaths, size_t nReadPaths);
 SDL_RWops* XENO_openSDLBuffer(const char* inFilename);
 void XENO_closeSDLBuffer(SDL_RWops* rw);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //_XENO_FSUTILS_H_
