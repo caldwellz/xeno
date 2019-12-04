@@ -1,0 +1,19 @@
+#ifndef __NEW_H__
+#define __NEW_H__
+#ifdef NXDK
+
+#include <stdlib.h>
+
+void *operator new(size_t size);
+void *operator new[](size_t size);
+void operator delete(void *p);
+void operator delete[](void *p);
+
+//Copied from the OSDev.org wiki page on C++
+inline void *operator new(size_t, void *p)     throw() { return p; }
+inline void *operator new[](size_t, void *p)   throw() { return p; }
+inline void  operator delete  (void *, void *) throw() { };
+inline void  operator delete[](void *, void *) throw() { };
+
+#endif //NXDK
+#endif //__NEW_H__

@@ -1,0 +1,20 @@
+TINYXML_DIR = $(LIBS_DIR)/tinyxml2
+TINYXML_SRCS = $(wildcard $(TINYXML_DIR)/*.cpp)
+TINYXML_OBJS = $(addsuffix .obj, $(basename $(TINYXML_SRCS)))
+TINYXML_DEPS = $(addsuffix .d, $(TINYXML_SRCS))
+TINYXML_LIB = $(LIBS_DIR)/libtinyxml2$(LIB_EXT)
+
+$(TINYXML_LIB): $(TINYXML_OBJS)
+
+$(BINTARGET): $(TINYXML_LIB)
+
+TINYXML_FLAGS = -I$(TINYXML_DIR)
+CXXFLAGS += $(TINYXML_FLAGS)
+
+clean: clean-tinyxml
+
+.PHONY: clean-tinyxml
+clean-tinyxml:
+	$(VE)$(RM) $(TINYXML_OBJS) \
+             $(TINYXML_DEPS) \
+	           $(TINYXML_LIB)
