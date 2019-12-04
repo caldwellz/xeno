@@ -18,7 +18,7 @@ endif
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-LD           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)gcc
+LD           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)g++
 AS           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)as
 CC           = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)gcc
 CXX          = $(TOOLCHAIN_DIR)/$(TOOLCHAIN_PREFIX)g++
@@ -32,7 +32,7 @@ APP_CFLAGS  = -fno-exceptions -Wno-ignored-attributes -Werror=implicit-function-
 							-DAPP_TITLE='"$(APP_TITLE)"' -I"$(ENGINE_DIR)/include" $(DEBUG_FLAG)
 APP_ASFLAGS = 
 APP_CXXFLAGS = $(APP_CFLAGS) -fno-threadsafe-statics -fno-rtti
-APP_LDFLAGS = -lkernel32 -lmingw32
+APP_LDFLAGS = -static-libstdc++ -static-libgcc -lkernel32 -lmingw32 
 LIB_EXT = .a
 
 
