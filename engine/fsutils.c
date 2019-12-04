@@ -67,7 +67,7 @@ uint32_t XENO_readFile(const char* inFilename, char** outData) {
 
         if (length_read == file_size) {
           if (*outData)
-            free(*outData);
+            free(*outData); // TODO: Be careful; this can bite if we're passed a new but uninitialized pointer
           buffer[length_read] = '\0';
           (*outData) = buffer;
           return length_read;

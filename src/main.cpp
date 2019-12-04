@@ -6,6 +6,10 @@
 #include <xeno/fsutils.h>
 #include <xeno/imageutils.h>
 
+#include <SDL2/SDL.h>
+#include <physfs.h>
+#include <tinyxml2.h>
+
 #ifdef XENO_PLATFORM_NXDK
 #include <hal/xbox.h>
 #include <hal/video.h>
@@ -15,13 +19,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <SDL2/SDL.h>
-#include <physfs.h>
 
 //Screen dimension constants
 #ifdef XENO_PLATFORM_NXDK
-const extern int SCREEN_WIDTH;
-const extern int SCREEN_HEIGHT;
+extern "C" {
+  const extern int SCREEN_WIDTH;
+  const extern int SCREEN_HEIGHT;
+}
 #else
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -57,7 +61,22 @@ int main(int argc, char* argv[]) {
     debugSleep(3000);
     return 1;
   }
+debugPrint("Mounted filesystems\n");
+  // Test XML reader
+  tinyxml2::XMLDocument doc;
+  char *dreamBuf = NULL;
+debugPrint("Created doc object\n");
+  uint32_t testLen = XENO_readFile("testfile.txt", &dreamBuf);
+debugPrint("Buffered test file\n");
+  uint32_t dreamLen = XENO_readFile("dream.xml", &dreamBuf);
+debugPrint("Buffered dream.xml\n");
+  if (doc.Parse(dreamBuf, dreamLen) == tinyxml2::XML_SUCCESS) {
+debugPrint("Parsed dream.xml\n");
+    debugPrint("Play title: '%s'\n", doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText());
+  } else
+    debugPrint("XML parse failed: %s\n", doc.ErrorStr());
 
+/*
   window = SDL_CreateWindow(APP_TITLE,
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
@@ -70,7 +89,7 @@ int main(int argc, char* argv[]) {
       return 1;
   }
 
-  /* Create the renderer */
+  // Create the renderer
   renderer = SDL_CreateRenderer(window, -1, 0);
   if (!renderer) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create renderer.\n");
@@ -84,7 +103,7 @@ int main(int argc, char* argv[]) {
   // Load image
   sprite = XENO_LoadBMPTexture(renderer, "stone.bmp");
 
-  /* Main render loop */
+  // Main render loop
   int done = 0;
   SDL_Event event;
   SDL_Rect position;
@@ -92,7 +111,7 @@ int main(int argc, char* argv[]) {
   position.y = 50;
   SDL_QueryTexture(sprite, NULL, NULL, &position.w, &position.h);
   while (!done) {
-      /* Check for events */
+      // Check for events
       while (SDL_PollEvent(&event)) {
           switch (event.type) {
           case SDL_WINDOWEVENT:
@@ -114,7 +133,7 @@ int main(int argc, char* argv[]) {
       SDL_RenderCopy(renderer, sprite, NULL, &position);
       SDL_RenderPresent(renderer);
   }
-
+*/
 debugPrint("main: end of code\n");
 debugSleep(3000);
   SDL_Quit();
