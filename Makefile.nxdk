@@ -12,7 +12,7 @@ else
 DEBUG_FLAG = -DDEBUG
 endif
 
-APP_FLAGS += -DNXDK -DAPP_TITLE='"$(APP_TITLE)"' $(DEBUG_FLAG) \
+APP_FLAGS += -DNXDK -D_XBOX -DAPP_TITLE='"$(APP_TITLE)"' $(DEBUG_FLAG) \
 						 -ferror-limit=10 -Werror=implicit-function-declaration \
 						 -I$(ENGINE_DIR)/include
 CFLAGS += $(APP_FLAGS)

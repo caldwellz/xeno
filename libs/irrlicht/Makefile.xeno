@@ -1,0 +1,20 @@
+IRRLICHT_DIR = $(LIBS_DIR)/irrlicht
+IRRLICHT_SRCS = $(wildcard $(IRRLICHT_DIR)/src/*.cpp)
+IRRLICHT_OBJS = $(addsuffix .obj, $(basename $(IRRLICHT_SRCS)))
+IRRLICHT_DEPS = $(addsuffix .d, $(IRRLICHT_SRCS))
+IRRLICHT_LIB = $(LIBS_DIR)/libirrlicht$(LIB_EXT)
+
+$(IRRLICHT_LIB): $(IRRLICHT_OBJS)
+
+$(BINTARGET): $(IRRLICHT_LIB)
+
+IRRLICHT_FLAGS = -Wno-pragma-pack -I$(IRRLICHT_DIR)/include -I$(IRRLICHT_DIR)/include/irrlicht
+CXXFLAGS += $(IRRLICHT_FLAGS)
+
+clean: clean-irrlicht
+
+.PHONY: clean-irrlicht
+clean-irrlicht:
+	$(VE)$(RM) $(IRRLICHT_OBJS) \
+             $(IRRLICHT_DEPS) \
+	           $(IRRLICHT_LIB)
