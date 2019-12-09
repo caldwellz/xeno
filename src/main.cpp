@@ -9,6 +9,8 @@
 #include <SDL2/SDL.h>
 #include <physfs.h>
 #include <tinyxml2.h>
+#include <irrlicht.h>
+using namespace irr;
 
 #ifdef XENO_PLATFORM_NXDK
 #include <hal/xbox.h>
@@ -40,7 +42,7 @@ int main(void) {
 int main(int argc, char* argv[]) {
   char *argv0 = argv[0];
 #endif
-
+/*
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *sprite;
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
 
   if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't set scale sampling quality.\n");
-
+*/
   const char* mounts[] = {"override", "resource.zip"};
   if (!XENO_initFilesystem(argv0, mounts, 2)) {
     debugPrint("initFilesystem failed! PhysFS error msg: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -62,83 +64,57 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 debugPrint("Mounted filesystems\n");
-  // Test XML reader
-  tinyxml2::XMLDocument doc;
-  char *dreamBuf = NULL;
-debugPrint("Created doc object\n");
-  uint32_t testLen = XENO_readFile("testfile.txt", &dreamBuf);
-debugPrint("Buffered test file\n");
-  uint32_t dreamLen = XENO_readFile("dream.xml", &dreamBuf);
-debugPrint("Buffered dream.xml\n");
-  if (doc.Parse(dreamBuf, dreamLen) == tinyxml2::XML_SUCCESS) {
-debugPrint("Parsed dream.xml\n");
-    debugPrint("Play title: '%s'\n", doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText());
-  } else
-    debugPrint("XML parse failed: %s\n", doc.ErrorStr());
 
-/*
-  window = SDL_CreateWindow(APP_TITLE,
-    SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOWPOS_UNDEFINED,
-    SCREEN_WIDTH, SCREEN_HEIGHT,
-    SDL_WINDOW_SHOWN);
-  if(window == NULL)
-  {
-      debugPrint( "Window could not be created!\n");
-      SDL_Quit();
-      return 1;
-  }
+  // Test Irrlicht renderer
+  IrrlichtDevice *device = createDevice(video::EDT_BURNINGSVIDEO, core::dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, false);
+  if (device) {
+    debugPrint("main: IrrlichtDevice created\n");
+    video::IVideoDriver* driver = device->getVideoDriver();
+    scene::ISceneManager* smgr = device->getSceneManager();
+    debugPrint("main: device pointers grabbed\n");
 
-  // Create the renderer
-  renderer = SDL_CreateRenderer(window, -1, 0);
-  if (!renderer) {
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create renderer.\n");
-      SDL_Quit();
-      return 1;
-  }
+    if (smgr->addCameraSceneNode(0, core::vector3df(0,-20,0), core::vector3df(0,0,0)))
+      debugPrint("main: camera created\n");
+    else
+      debugPrint("main: failed to create camera\n");
+    scene::IMeshSceneNode* cube = smgr->addCubeSceneNode(5.0);
+    if (cube) {
+      debugPrint("main: cube created\n");
+      scene::ISceneNodeAnimator* anim = smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
+      if (anim) {
+        cube->addAnimator(anim);
+        debugPrint("main: cube animator attached\n");
+        anim->drop();
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
-  SDL_RenderClear(renderer);
+        // Begin main loop
+        debugSleep(2000);
+        u32 frames=0;
+        while(device->run()) {
+          driver->beginScene(true, true, video::SColor(0,255,255,255));
+          smgr->drawAll();
+          driver->endScene();
 
-  // Load image
-  sprite = XENO_LoadBMPTexture(renderer, "stone.bmp");
-
-  // Main render loop
-  int done = 0;
-  SDL_Event event;
-  SDL_Rect position;
-  position.x = 30;
-  position.y = 50;
-  SDL_QueryTexture(sprite, NULL, NULL, &position.w, &position.h);
-  while (!done) {
-      // Check for events
-      while (SDL_PollEvent(&event)) {
-          switch (event.type) {
-          case SDL_WINDOWEVENT:
-              switch (event.window.event) {
-              case SDL_WINDOWEVENT_EXPOSED:
-//                  SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
-//                  SDL_RenderClear(renderer);
-                  break;
-              }
-              break;
-          case SDL_QUIT:
-              done = 1;
-              break;
-          default:
-              break;
-          }
+//          if (++frames==50) {
+//            (s32)driver->getFPS();
+//            frames=0;
+//          }
+        }
       }
-      SDL_RenderClear(renderer);
-      SDL_RenderCopy(renderer, sprite, NULL, &position);
-      SDL_RenderPresent(renderer);
+      else
+        debugPrint("main: failed to create animation\n");
+    }
+    else
+      debugPrint("main: failed to create cube\n");
   }
-*/
+  else
+    debugPrint("main: failed to create IrrlichtDevice\n");
+
 debugPrint("main: end of code\n");
 debugSleep(3000);
-  SDL_Quit();
+  device->drop();
+//  SDL_Quit();
   PHYSFS_deinit(); // TODO: crashes on Xbox
-debugPrint("main: finished PHYSFS_deinit()");
+debugPrint("main: finished PHYSFS_deinit()\n");
   debugSleep(3000);
   return 0;
 }

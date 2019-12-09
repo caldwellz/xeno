@@ -19,16 +19,18 @@
 /*************************************************/
 // Configure platform
 #ifdef NXDK
-  #define _IRR_STATIC_LIB_
-  #define _IRR_OVERRIDE_
+  #define IRRLICHT_FAST_MATH
   #include <windef.h>
 #endif
+#define _IRR_STATIC_LIB_
+#define _IRR_OVERRIDE_
 #define BURNINGVIDEO_RENDERER_BEAUTIFUL
-#define IRRLICHT_FAST_MATH
 #define NO_IRR_SCENEMANAGER_DEBUG
 #define NO_IRR_COMPILE_WITH_CONSOLE_DEVICE_
 
 // Temporarily patch out almost everything except BMP and OBJ support
+#define NO_IRR_COMPILE_WITH_DIRECT3D_9_
+#define NO_IRR_COMPILE_WITH_OPENGL_
 #define NO_IRR_COMPILE_WITH_SOFTWARE_
 #define NO_IRR_COMPILE_WITH_GUI_
 #define NO_IRR_COMPILE_WITH_LIBJPEG_

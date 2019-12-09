@@ -2026,7 +2026,7 @@ public:
 
 	virtual core::stringw getStringW()
 	{
-		wchar_t* buf[32];
+		wchar_t buf[32];
     #ifdef NXDK
 		swprintf((char*) buf, 32, "%p", (char*) Value);
     #else
