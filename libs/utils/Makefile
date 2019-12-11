@@ -18,7 +18,7 @@ endif
 
 CLEANRULES += clean-utils
 
-.PHONY: clean-utils
+.PHONY: clean-utils $(UTILS_DIR)/new
 clean-utils:
 	$(VE)rm -f $(UTILS_OBJS) \
 	           $(UTILS_LIB)

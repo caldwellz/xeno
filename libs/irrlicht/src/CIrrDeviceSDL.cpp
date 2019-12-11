@@ -27,6 +27,14 @@
 #include "ICameraSceneNode.h"
 #include "CLogger.h"
 
+#ifdef NXDK
+  #include <hal/xbox.h>
+  #include <hal/debug.h>
+  #define SDL_Delay(x) XSleep(x)
+#else
+  #define debugPrint(...)
+#endif
+
 #ifdef _MSC_VER
 #pragma comment(lib, "SDL2.lib")
 #endif // _MSC_VER
@@ -68,11 +76,17 @@ namespace irr
             WindowHasFocus(false), WindowMinimized(false), window((SDL_Window*)param.WindowId),
             glContext(NULL), renderer(NULL), rendFlags(0), winFlags(SDL_WINDOW_RESIZABLE), filler()
     {
+        Uint32 flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+        #ifndef _IRR_XBOX_PLATFORM_
+        flags |= SDL_INIT_TIMER | SDL_INIT_AUDIO;
+        #endif
+
         #ifdef _DEBUG
         setDebugName("CIrrDeviceSDL");
         #endif
 
         #if defined(_IRR_COMPILE_WITH_JOYSTICK_EVENTS_)
+        flags |= SDL_INIT_GAMECONTROLLER;
         SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
         SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "1");
         SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "1");
@@ -81,8 +95,10 @@ namespace irr
         SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
         // Initialize SDL2... everything, because it's easier
-        if(SDL_Init(SDL_INIT_EVERYTHING) == 0)
+        // Except timers and audio, because no support on NXDK; we replace the one used timer function (SDL_Delay) with Sleep()
+        if(SDL_Init(flags) == 0)
         {
+debugPrint("IrrDeviceSDL: SDL initialized\n");
             // create keymap
             createKeyMap();
 
@@ -90,7 +106,11 @@ namespace irr
             if(createWindow())
             {
                 SDL_VERSION(&Info.version); // initialize info structure with SDL version info
+                #ifdef NXDK
+                if (true) {
+                #else
                 if(SDL_GetWindowWMInfo(window, &Info)) { // the call returns true on success
+                #endif
                     // success
                     const char *subsystem = "an unknown system!";
                     switch(Info.subsystem) {
@@ -185,6 +205,7 @@ namespace irr
             char log[300];
             sprintf(log, "Unable to initialize SDL!  %s\n", SDL_GetError());
             os::Printer::Logger->log(log, ELL_ERROR);
+            debugPrint("IrrDeviceSDL: Unable to initialize SDL!  %s\n", SDL_GetError());
             Close = true;
         }
     }
@@ -325,7 +346,7 @@ namespace irr
     bool CIrrDeviceSDL::createRenderer()
     {
         if(Close) return false;
-
+debugPrint("IrrDeviceSDL: Requested driver type '%d'\n", CreationParams.DriverType);
         switch(CreationParams.DriverType)
         {
 //            case video::EDT_OGLES1:
@@ -340,7 +361,9 @@ namespace irr
                 }
                 return false;
             case video::EDT_BURNINGSVIDEO:
+                #ifndef NXDK
                 rendFlags |= SDL_RENDERER_ACCELERATED;
+                #endif
                 break;
             case video::EDT_SOFTWARE:
                 rendFlags |= SDL_RENDERER_SOFTWARE;
@@ -352,7 +375,7 @@ namespace irr
                 return false;
         }
         if(CreationParams.Vsync) rendFlags |= SDL_RENDERER_PRESENTVSYNC;
-
+debugPrint("IrrDeviceSDL: Switch handled the driver type\n");
         renderer = SDL_CreateRenderer(window, -1, rendFlags);
 
         if(renderer)
@@ -1220,7 +1243,7 @@ namespace irr
         SDL_Delay(timeMs);
         if(pauseTimer && !wasStopped) Timer->start();
     }
-
+ 
     //! sets the caption of the window
     void CIrrDeviceSDL::setWindowCaption(const wchar_t* text)
     {

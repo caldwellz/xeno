@@ -71,7 +71,6 @@ debugPrint("Mounted filesystems\n");
     debugPrint("main: IrrlichtDevice created\n");
     video::IVideoDriver* driver = device->getVideoDriver();
     scene::ISceneManager* smgr = device->getSceneManager();
-    debugPrint("main: device pointers grabbed\n");
 
     if (smgr->addCameraSceneNode(0, core::vector3df(0,-20,0), core::vector3df(0,0,0)))
       debugPrint("main: camera created\n");
@@ -87,17 +86,16 @@ debugPrint("Mounted filesystems\n");
         anim->drop();
 
         // Begin main loop
-        debugSleep(2000);
-        u32 frames=0;
+        debugSleep(1000);
+        u32 fps = 0;
         while(device->run()) {
-          driver->beginScene(true, true, video::SColor(0,255,255,255));
+//          debugClearScreen();
+          driver->beginScene(true, true, video::SColor(255,200,200,200));
           smgr->drawAll();
           driver->endScene();
 
-//          if (++frames==50) {
-//            (s32)driver->getFPS();
-//            frames=0;
-//          }
+//          fps = driver->getFPS();
+//          debugPrint("FPS: %d\n", fps);
         }
       }
       else

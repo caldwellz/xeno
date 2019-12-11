@@ -21,6 +21,7 @@
 #ifdef NXDK
   #define IRRLICHT_FAST_MATH
   #include <windef.h>
+  #define __x86__
 #endif
 #define _IRR_STATIC_LIB_
 #define _IRR_OVERRIDE_
@@ -31,7 +32,7 @@
 // Temporarily patch out almost everything except BMP and OBJ support
 #define NO_IRR_COMPILE_WITH_DIRECT3D_9_
 #define NO_IRR_COMPILE_WITH_OPENGL_
-#define NO_IRR_COMPILE_WITH_SOFTWARE_
+//#define NO_IRR_COMPILE_WITH_SOFTWARE_
 #define NO_IRR_COMPILE_WITH_GUI_
 #define NO_IRR_COMPILE_WITH_LIBJPEG_
 #define NO_IRR_COMPILE_WITH_LIBPNG_
@@ -242,7 +243,7 @@ define out. */
 //! Define _IRR_COMPILE_WITH_SOFTWARE_ to compile the Irrlicht engine with software driver
 /** If you do not need the software driver, or want to use Burning's Video instead,
 comment this define out */
-//#define _IRR_COMPILE_WITH_SOFTWARE_
+#define _IRR_COMPILE_WITH_SOFTWARE_
 #ifdef NO_IRR_COMPILE_WITH_SOFTWARE_
 #undef _IRR_COMPILE_WITH_SOFTWARE_
 #endif

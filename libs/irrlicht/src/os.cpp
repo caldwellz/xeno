@@ -53,12 +53,19 @@ namespace os
 // Windows specific functions
 // ----------------------------------------------------------------
 
-#if defined(_IRR_XBOX_PLATFORM_) && !defined(NXDK)
-#include <xtl.h>
+#if defined(_IRR_XBOX_PLATFORM_)
+  #ifdef NXDK
+    #include <hal/debug.h>
+    #include <windows.h>
+    #include <time.h>
+  #else
+    #include <xtl.h>
+  #endif
 #else
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <time.h>
+  #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
+  #include <time.h>
+  #define debugPrint(...) printf(__VA_ARGS__)
 #endif
 
 namespace irr
@@ -72,6 +79,10 @@ namespace os
 		core::stringw tmp(message);
 		tmp += L"\n";
 		OutputDebugStringW(tmp.c_str());
+#elif defined(NXDK)
+    core::stringc tmp(message);
+		tmp += "\n";
+    debugPrint(tmp.c_str());
 #else
 		core::stringc tmp(message);
 		tmp += "\n";
